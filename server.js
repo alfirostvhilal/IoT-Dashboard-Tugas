@@ -11,7 +11,12 @@ const io = socketIo(server);
 
 // Konfigurasi
 const PORT = process.env.PORT || 3001;
-const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://localhost:1883';
+
+// Broker HiveMQ Cloud pakai protokol mqtts:// (MQTT over TLS) di port 8883
+// Contoh MQTT_BROKER: mqtts://xxxxxxxx.s1.eu.hivemq.cloud:8883
+const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtts://8533ea47d46c495cb14ebf09c782e7f9.s1.eu.hivemq.cloud:8883';
+const MQTT_USERNAME = process.env.MQTT_USERNAME || 'ubuntu';
+const MQTT_PASSWORD = process.env.MQTT_PASSWORD || 'Ubuntu123';
 const MQTT_TOPIC = '#'; // Subscribe ke semua topic
 
 // Serve static files
@@ -49,7 +54,12 @@ setInterval(() => {
 }, 10000); // Save every 10 seconds
 
 // Koneksi ke MQTT broker
-const mqttClient = mqtt.connect(MQTT_BROKER);
+const mqttClient = mqtt.connect(MQTT_BROKER, {
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
+    clientId: 'dashboard-server-' + Math.random().toString(16).slice(2, 8),
+    rejectUnauthorized: true // HiveMQ Cloud pakai sertifikat valid, jadi aman divalidasi
+});
 
 mqttClient.on('connect', () => {
     console.log(`Connected to MQTT broker: ${MQTT_BROKER}`);
